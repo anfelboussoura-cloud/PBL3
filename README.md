@@ -18,7 +18,7 @@ Our app is a public transit route planner for several French cities (Paris, Lyon
 Instructions on how to get this project running on a fresh machine.
 
 Clone the repo:
-git clone [https://github.com/anfelboussoura-cloud/pbl3%5C]
+git clone [https://github.com/anfelboussoura-cloud/PBL3]
 cd [project-folder]
 
 Setup Virtual Environment:
