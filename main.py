@@ -264,25 +264,32 @@ def display_route(path, total_time):
     current_line = path[0][1]
 
     for i, (station, line) in enumerate(path):
+        # enumerate() gives both the index (i) and the value (station, line) at each step
 
         if i == 0:
+            # First station in the path → this is where the journey starts
             print(f"  Board at {station}, line {line}")
             current_line = line
 
         elif i == len(path) - 1:
-            if line != current_line:
-                prev_station = path[i - 1][0]
+            # Last station in the path (index = length - 1) → journey ends here
+            if line != current_line :
+                # Line changed on the very last step → show the transfer first
+                prev_station = path[i - 1][0] # [0] gets the station name, ignoring the line
                 print(f"  Transfer at {prev_station}, take line {line}")
                 current_line = line
             print(f"  Alight at {station}, line {line}")
 
         else :
+            # Middle stations : still travelling, not at the end yet
             if line != current_line:
+                # The line changed → we must have transferred at the previous station
                 prev_station = path[i - 1][0]
                 print(f"  Transfer at {prev_station}, take line {line}")
-                current_line = line
+                current_line = line  # update the current line tracker
                 print(f"  Continue through {station}")
             else:
+                # Same line as before → just passing through
                 print(f"  Continue through {station}")
 
     print("-"*55)
@@ -307,14 +314,16 @@ CITY_FILES = {
 def select_city():
     """Show the city list and return the name of the chosen city."""
     print("\n=== Available cities ===")
-    cities = list(CITY_FILES.keys())
-    for i, city in enumerate(cities, 1):
+    cities = list(CITY_FILES.keys())  # extract city names as a list to allow index access
+    for i, city in enumerate(cities, 1): # start counting from 1 (not 0) for display
         print(f"  {i}. {city}")
 
     while True:
         choice = input("Choose a city (number): ").strip()
-        if choice.isdigit() and 1 <= int(choice) <= len(cities):
-            return cities[int(choice) - 1]
+        if choice.isdigit() and 1 <= int(choice) <= len(cities): 
+            # isdigit() : checks the input is a number, not letters or symbols
+            # 1 <= ... <= len(cities) : checks the number is within the valid range
+            return cities[int(choice) - 1] # -1 because lists start at index 0, not 1
         print("Invalid choice, please try again.")
 
 
@@ -327,10 +336,14 @@ def select_station(graph, prompt):
     while True:
         station = input(prompt).strip()
         if station in graph:
-            return station
+            return station # exact match found → done
+        
+        # No exact match → search for partial matches (ignoring upper and lowercase letters)
         matches = [s for s in graph if station.lower() in s.lower()]
+        # .lower() on both sides so "chat" matches "Châtelet" regardless of case
         if matches:
             print(f"Station not found. Did you mean: {', '.join(matches[:5])} ?")
+            # [:5] : show at most 5 suggestions to avoid flooding the screen
         else:
             print("Station not found. Check the spelling.")
 
