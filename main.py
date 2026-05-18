@@ -9,9 +9,11 @@ from collections import deque
 # Graph Utility Functions 
 # ==============================================================================
 
+#returns the number of vertices (order of the graph)
 def vertexCount(G):
-    return len(G) # Number of stations = number of keys in the dictionary
+    return len(G) # Number of stations = number of vertices (/keys) in the dictionary
 
+#returns the number of edges of an undirected graph (its size)
 def edgeCount(G) :
     s = 0
     for value in G.values():
@@ -31,7 +33,7 @@ def load_network(filepath):
 
 
 def build_graph(data):
-    """ We build a weighted graph from the JSON files.
+    """ We build a weighted graph from the JSON files. 
 
     The JSON structure uses French keys:
       - "lignes" : dict of lines, each with a "stations" list (ordered)
@@ -47,8 +49,10 @@ def build_graph(data):
     (The weight is the time_in_seconds)
 
     Returns:
-     graph : dict, the weighted graph
-     transfers : dict, station -> {'lines': [...], 'transfer_time': int}"""
+     graph : dictionary representing the weighted graph
+     transfers : a dictionary where each transfer station name is a key,
+                 and gives back the lines available at that station
+                 and the time needed to transfer between them"""
    
     graph = {}
 
@@ -63,9 +67,9 @@ def build_graph(data):
             if station not in graph:
                 graph[station] = []
 
-    # Step 2 : add edges from the connexions list (if yhe list exists and is not empty)
+    # Step 2 : add edges from the connexions list (if the list exists and is not empty)
     # Important: the connexions list already contains both directions (A->B and B->A)
-    # so we just add each connexion as it is, without adding the reverse ourselves.
+    # so we add each connection as a one-way edge only
     # Adding the reverse would create duplicates in the graph.
     connexions = data.get('connexions', data.get('connections', []))
     for conn in connexions:
@@ -80,7 +84,7 @@ def build_graph(data):
             graph[arr] = []
 
         # Add as a one-way edge: the reverse direction is already listed
-        # as a separate entry in the connexions list (as in mini_reseau.json).
+        # as a separate entry in the connexions list (as in mini_reseau.json)
         graph[dep].append((arr, time, line))
 
     # Step 3 : if connexions was empty, generate edges from the ordered station lists
@@ -102,10 +106,8 @@ def build_graph(data):
         station = transfer['station']
         lines = transfer.get('lignes', transfer.get('lines', []))
         t_time = transfer.get('temps', transfer.get('transfer_time', 120))
-        transfers[station] = {
-            'lines':         lines, # Lines available at this station
-            'transfer_time': t_time 
-        }
+        transfers[station] = { 'lines': lines, # Lines available at this station
+                               'transfer_time': t_time }
 
     return graph, transfers
 
@@ -186,9 +188,10 @@ def dijkstra(graph, transfers, start, end):
 
     A transfer penalty of 120 seconds is added whenever the traveler switches line at a transfer station.
 
-    Returns :
-     (path, total_time)  where path is a list of (station, line)
-     (None, inf)  if no path exists"""
+    Returns:
+        path : a list of (station, line) representing each step of the route
+        total_time : the total travel time in seconds
+        If no path exists, returns (None, inf)"""
     
     TRANSFER_TIME = 120
 
@@ -251,7 +254,7 @@ def format_time(seconds):
 
 def display_route(path, total_time):
     """ Print the route step by step in a readable format.
-    path: list of (station, line)"""
+    path : list of (station, line)"""
 
     if not path:
         print("No route found.")
