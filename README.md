@@ -19,7 +19,7 @@ Instructions on how to get this project running on a fresh machine.
 
 Clone the repo:
 git clone [https://github.com/anfelboussoura-cloud/PBL3]
-cd [project-folder]
+cd /PBL3
 
 Setup Virtual Environment:
 python -m venv .venv
